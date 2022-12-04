@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.firebase.ui.auth.AuthMethodPickerLayout
@@ -78,6 +79,8 @@ class AuthenticationActivity : AppCompatActivity() {
                 goToReminderActivity()
             } else {
                 Log.e("Authentication Error", response?.error.toString())
+                val message = "Sign in unsuccessful ${response?.error?.errorCode}"
+                Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
             }
         }
     }

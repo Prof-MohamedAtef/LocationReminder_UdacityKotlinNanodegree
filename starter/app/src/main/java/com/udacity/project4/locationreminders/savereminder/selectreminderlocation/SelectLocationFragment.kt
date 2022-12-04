@@ -17,7 +17,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PointOfInterest
-import com.udacity.project4.BuildConfig.MAPS_API_KEY_PAID
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
@@ -58,7 +57,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             .findFragmentById(R.id.map_fragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        Log.d("PAID Maps key is:","${MAPS_API_KEY_PAID}")
 
         binding.savePoi.setOnClickListener { view->
             onLocationSelected()
