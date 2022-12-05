@@ -31,8 +31,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
 
-    private var mMap: GoogleMap?=null
-    private var selectedPoi:PointOfInterest?=null
+    private var mMap: GoogleMap? = null
+    private var selectedPoi: PointOfInterest? = null
 
 //    private val testingPoi:List<PointOfInterest> by inject()
 
@@ -58,7 +58,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
 
-        binding.savePoi.setOnClickListener { view->
+        binding.savePoi.setOnClickListener { view ->
             onLocationSelected()
         }
 
@@ -75,13 +75,14 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.M)
-    fun checkGrantedLocation(){
-        if (anyPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)){
-            mMap?.isMyLocationEnabled=true
+    fun checkGrantedLocation() {
+        if (anyPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)) {
+            mMap?.isMyLocationEnabled = true
 
-            val fusedLocationProvider=LocationServices.getFusedLocationProviderClient(requireActivity())
+            val fusedLocationProvider =
+                LocationServices.getFusedLocationProviderClient(requireActivity())
 
-            val location=fusedLocationProvider.lastLocation
+            val location = fusedLocationProvider.lastLocation
 
             location.addOnCompleteListener {
                 if (it.isSuccessful) it.result?.let { location ->
@@ -100,16 +101,16 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
 
     private fun onLocationSelected() {
-        if (selectedPoi!=null){
-            _viewModel.selectedPOI.value=selectedPoi
-            _viewModel.latitude.value=selectedPoi?.latLng?.latitude
-            _viewModel.longitude.value=selectedPoi?.latLng?.longitude
-            _viewModel.reminderSelectedLocationStr.value=selectedPoi?.name
+        if (selectedPoi != null) {
+            _viewModel.selectedPOI.value = selectedPoi
+            _viewModel.latitude.value = selectedPoi?.latLng?.latitude
+            _viewModel.longitude.value = selectedPoi?.latLng?.longitude
+            _viewModel.reminderSelectedLocationStr.value = selectedPoi?.name
 
-            _viewModel.navigationCommand.value=
+            _viewModel.navigationCommand.value =
                 NavigationCommand.Back
-        }else{
-            _viewModel.showSnackBarInt.value=R.string.err_select_location
+        } else {
+            _viewModel.showSnackBarInt.value = R.string.err_select_location
         }
     }
 
@@ -119,19 +120,19 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.hybrid_map -> {
-            mMap?.mapType=GoogleMap.MAP_TYPE_HYBRID
+            mMap?.mapType = GoogleMap.MAP_TYPE_HYBRID
             true
         }
         R.id.normal_map -> {
-            mMap?.mapType=GoogleMap.MAP_TYPE_NORMAL
+            mMap?.mapType = GoogleMap.MAP_TYPE_NORMAL
             true
         }
         R.id.terrain_map -> {
-            mMap?.mapType=GoogleMap.MAP_TYPE_TERRAIN
+            mMap?.mapType = GoogleMap.MAP_TYPE_TERRAIN
             true
         }
         R.id.satellite_map -> {
-            mMap?.mapType=GoogleMap.MAP_TYPE_SATELLITE
+            mMap?.mapType = GoogleMap.MAP_TYPE_SATELLITE
             true
         }
         else -> super.onOptionsItemSelected(item)
@@ -139,20 +140,26 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onMapReady(map: GoogleMap) {
-        mMap=map
+        mMap = map
 
-        mMap?.setMapStyle(context?.let { MapStyleOptions.loadRawResourceStyle(it, R.raw.gray_map_style) })
+        mMap?.setMapStyle(context?.let {
+            MapStyleOptions.loadRawResourceStyle(
+                it,
+                R.raw.gray_map_style
+            )
+        })
 
         checkGrantedLocation()
 
         mMap?.setOnMapClickListener { latLng ->
             mMap?.clear()
 
-            val selectedLocationMarker=mMap?.addMarker(MarkerOptions().position(latLng).title(latLng.toString()))
+            val selectedLocationMarker =
+                mMap?.addMarker(MarkerOptions().position(latLng).title(latLng.toString()))
 
             selectedLocationMarker?.showInfoWindow()
 
-            selectedPoi=PointOfInterest(latLng, latLng.toString(), latLng.toString())
+            selectedPoi = PointOfInterest(latLng, latLng.toString(), latLng.toString())
         }
 
         mMap?.setOnPoiClickListener { poi ->
@@ -172,13 +179,13 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (requestCode== REQUEST_PERMISSION_CODE){
+        if (requestCode == REQUEST_PERMISSION_CODE) {
             if (permissions.filter { FOREGROUND_LOCATION_PERMISSIONS.contains(it) }
-                    .any{ grantResults[permissions.indexOf(it)]==PackageManager.PERMISSION_GRANTED }
-            ){
+                    .any { grantResults[permissions.indexOf(it)] == PackageManager.PERMISSION_GRANTED }
+            ) {
                 checkGrantedLocation()
-            }else{
-                _viewModel.showSnackBarInt.value=R.string.permission_denied_explanation
+            } else {
+                _viewModel.showSnackBarInt.value = R.string.permission_denied_explanation
             }
         }
     }

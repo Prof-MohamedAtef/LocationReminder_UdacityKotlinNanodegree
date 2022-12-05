@@ -23,7 +23,6 @@ import com.udacity.project4.databinding.FragmentSaveReminderBinding
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.*
 import com.udacity.project4.utils.Config.REQUEST_CHECK_SETTINGS
-import kotlinx.android.synthetic.main.fragment_save_reminder.*
 import org.koin.android.ext.android.inject
 
 class SaveReminderFragment : BaseFragment() {
@@ -73,22 +72,17 @@ class SaveReminderFragment : BaseFragment() {
             title, description, location, latitude, longitude
         )
 
-        if (allPermissionsGranted(BACKGROUND_LOCATION_PERMISSION) &&
-            anyPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)
-        ) {
-            if (allPermissionsGranted(BACKGROUND_LOCATION_PERMISSION) &&
-                anyPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)
-            ) {
+        if (allPermissionsGranted(BACKGROUND_LOCATION_PERMISSION)) {
+            if (allPermissionsGranted(BACKGROUND_LOCATION_PERMISSION)) {
                 checkLocationSettingsEnabled {
                     addGeofencingRequest(requireContext(), reminder)
                     _viewModel.validateAndSaveReminder(reminder)
                 }
             } else {
-                requestForegroundAndBackgroundLocationPermissions()
+                requestBackgroundLocationPermission()
             }
         } else {
-            val permission = BACKGROUND_LOCATION_PERMISSION + FOREGROUND_LOCATION_PERMISSIONS
-            requestMissingPermissions(permission)
+            requestMissingPermissions(BACKGROUND_LOCATION_PERMISSION)
         }
     }
 
@@ -99,9 +93,9 @@ class SaveReminderFragment : BaseFragment() {
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun requestForegroundAndBackgroundLocationPermissions() {
-        if (!anyPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)) {
-            requestMissingPermissions(FOREGROUND_LOCATION_PERMISSIONS)
+    private fun requestBackgroundLocationPermission() {
+        if (!anyPermissionsGranted(BACKGROUND_LOCATION_PERMISSION)) {
+            requestMissingPermissions(BACKGROUND_LOCATION_PERMISSION)
         }
     }
 
@@ -157,18 +151,9 @@ class SaveReminderFragment : BaseFragment() {
         grantResults: IntArray
     ) {
         if (requestCode == REQUEST_PERMISSION_CODE) {
-            val foreground = permissions.filter { FOREGROUND_LOCATION_PERMISSIONS.contains(it) }
-            val anyForeground =
-                foreground.isEmpty() || foreground.any { grantResults[permissions.indexOf(it)] == PackageManager.PERMISSION_GRANTED }
-
             val background = permissions.filter { BACKGROUND_LOCATION_PERMISSION.contains(it) }
-            val allBackground =
-                background.isEmpty() || background.all { grantResults[permissions.indexOf(it)] == PackageManager.PERMISSION_GRANTED }
-
-            if (anyForeground && allBackground) {
-                /*
-                save reminders
-                 */
+            val allBackground = background.isEmpty() || background.all { grantResults[permissions.indexOf(it)] == PackageManager.PERMISSION_GRANTED }
+            if (allBackground) {
                 saveReminder()
             } else {
                 _viewModel.showSnackBarInt.value = R.string.permission_denied_explanation
