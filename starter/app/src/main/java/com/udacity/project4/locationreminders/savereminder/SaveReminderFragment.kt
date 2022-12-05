@@ -26,7 +26,7 @@ import com.udacity.project4.utils.Config.REQUEST_CHECK_SETTINGS
 import kotlinx.android.synthetic.main.fragment_save_reminder.*
 import org.koin.android.ext.android.inject
 
-class SaveReminderFragment : BaseFragment(){
+class SaveReminderFragment : BaseFragment() {
     //Get the view model this time as a single to be shared with the another fragment
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSaveReminderBinding
@@ -76,9 +76,15 @@ class SaveReminderFragment : BaseFragment(){
         if (allPermissionsGranted(BACKGROUND_LOCATION_PERMISSION) &&
             anyPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)
         ) {
-            checkLocationSettingsEnabled {
-                addGeofencingRequest(requireContext(), reminder)
-                _viewModel.validateAndSaveReminder(reminder)
+            if (allPermissionsGranted(BACKGROUND_LOCATION_PERMISSION) &&
+                anyPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)
+            ) {
+                checkLocationSettingsEnabled {
+                    addGeofencingRequest(requireContext(), reminder)
+                    _viewModel.validateAndSaveReminder(reminder)
+                }
+            } else {
+                requestForegroundAndBackgroundLocationPermissions()
             }
         } else {
             val permission = BACKGROUND_LOCATION_PERMISSION + FOREGROUND_LOCATION_PERMISSIONS
@@ -89,12 +95,7 @@ class SaveReminderFragment : BaseFragment(){
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onStart() {
         super.onStart()
-        if (allPermissionsGranted(BACKGROUND_LOCATION_PERMISSION)&&
-                anyPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)){
-            checkLocationSettingsEnabled { null }
-        }else{
-            requestForegroundAndBackgroundLocationPermissions()
-        }
+
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -105,18 +106,18 @@ class SaveReminderFragment : BaseFragment(){
     }
 
     private fun checkLocationSettingsEnabled(function: () -> Unit) {
-        val builder=
+        val builder =
             LocationSettingsRequest.Builder().addLocationRequest(
                 LocationRequest.create().apply {
-                    priority=LocationRequest.PRIORITY_LOW_POWER
+                    priority = LocationRequest.PRIORITY_LOW_POWER
                 }
             )
 
-        val client: SettingsClient =LocationServices.getSettingsClient(requireActivity())
+        val client: SettingsClient = LocationServices.getSettingsClient(requireActivity())
         val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
 
-        task.addOnFailureListener{ exception ->
-            if (exception is ResolvableApiException){
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
                 try {
                     // Show the dialog by calling startResolutionForResult(),
                     // and check the result in onActivityResult().
@@ -124,7 +125,7 @@ class SaveReminderFragment : BaseFragment(){
                         exception.resolution.intentSender, REQUEST_CHECK_SETTINGS,
                         null, 0, 0, 0, null
                     )
-                }catch (sendEx: IntentSender.SendIntentException){
+                } catch (sendEx: IntentSender.SendIntentException) {
                     Snackbar.make(
                         requireView(),
                         R.string.location_required_error,
@@ -136,8 +137,8 @@ class SaveReminderFragment : BaseFragment(){
             }
         }
 
-        task.addOnCompleteListener{
-            if (it.isSuccessful){
+        task.addOnCompleteListener {
+            if (it.isSuccessful) {
                 Log.i("CheckDeviceLocation", "Granted")
                 Snackbar.make(
                     requireView(),
@@ -155,22 +156,22 @@ class SaveReminderFragment : BaseFragment(){
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (requestCode== REQUEST_PERMISSION_CODE){
-            val foreground=permissions.filter { FOREGROUND_LOCATION_PERMISSIONS.contains(it) }
+        if (requestCode == REQUEST_PERMISSION_CODE) {
+            val foreground = permissions.filter { FOREGROUND_LOCATION_PERMISSIONS.contains(it) }
             val anyForeground =
-                foreground.isEmpty() || foreground.any{ grantResults[permissions.indexOf(it)] == PackageManager.PERMISSION_GRANTED }
+                foreground.isEmpty() || foreground.any { grantResults[permissions.indexOf(it)] == PackageManager.PERMISSION_GRANTED }
 
             val background = permissions.filter { BACKGROUND_LOCATION_PERMISSION.contains(it) }
             val allBackground =
                 background.isEmpty() || background.all { grantResults[permissions.indexOf(it)] == PackageManager.PERMISSION_GRANTED }
 
-            if (anyForeground && allBackground){
+            if (anyForeground && allBackground) {
                 /*
                 save reminders
                  */
                 saveReminder()
-            }else{
-                _viewModel.showSnackBarInt.value=R.string.permission_denied_explanation
+            } else {
+                _viewModel.showSnackBarInt.value = R.string.permission_denied_explanation
             }
         }
     }
@@ -178,11 +179,11 @@ class SaveReminderFragment : BaseFragment(){
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode== REQUEST_CHECK_SETTINGS){
-            if (resultCode== Activity.RESULT_OK){
+        if (requestCode == REQUEST_CHECK_SETTINGS) {
+            if (resultCode == Activity.RESULT_OK) {
                 saveReminder()
-            }else{
-                _viewModel.showSnackBarInt.value=R.string.location_required_error
+            } else {
+                _viewModel.showSnackBarInt.value = R.string.location_required_error
             }
         }
     }
