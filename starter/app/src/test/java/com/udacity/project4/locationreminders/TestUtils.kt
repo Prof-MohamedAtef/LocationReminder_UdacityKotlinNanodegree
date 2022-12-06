@@ -23,4 +23,9 @@ class MainCoroutineRule(val dispatcher: TestCoroutineDispatcher = TestCoroutineD
         cleanupTestCoroutines()
         Dispatchers.resetMain()
     }
+
+    companion object{
+        var  notFoundMessage= "not found!"
+        var errorMessage = "Reminder Id not found"
+    }
 }

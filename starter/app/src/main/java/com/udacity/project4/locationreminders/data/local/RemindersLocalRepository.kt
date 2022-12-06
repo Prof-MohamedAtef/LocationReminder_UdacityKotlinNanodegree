@@ -20,6 +20,7 @@ class RemindersLocalRepository(
 
     /**
      * Get the reminders list from the local db
+     *
      * @return Result the holds a Success with all the reminders or an Error object with the error message
      */
     override suspend fun getReminders(): com.udacity.project4.locationreminders.data.dto.Result<List<ReminderDTO>> = withContext(ioDispatcher) {

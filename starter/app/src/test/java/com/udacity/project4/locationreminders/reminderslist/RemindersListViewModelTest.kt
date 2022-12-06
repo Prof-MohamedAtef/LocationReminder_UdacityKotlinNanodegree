@@ -1,5 +1,6 @@
 package com.udacity.project4.locationreminders.reminderslist
 
+import android.util.Log
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -16,6 +17,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
+import com.udacity.project4.locationreminders.MainCoroutineRule.Companion.errorMessage
 
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
@@ -78,7 +80,8 @@ class RemindersListViewModelTest {
 
         remindersListViewModel.loadReminders()
 
-        assertThat(remindersListViewModel.showSnackBar.getOrAwaitValue(), `is`("testing error!"))
+        assertThat(remindersListViewModel.showSnackBar.getOrAwaitValue(), `is`(errorMessage))
+        Log.e("Test Pass", "Test Returned this error Message$errorMessage")
     }
 
 

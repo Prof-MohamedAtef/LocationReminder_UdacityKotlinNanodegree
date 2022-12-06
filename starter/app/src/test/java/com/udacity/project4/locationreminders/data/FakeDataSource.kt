@@ -1,41 +1,18 @@
 package com.udacity.project4.locationreminders.data
 
 import androidx.lifecycle.MutableLiveData
+import com.udacity.project4.locationreminders.MainCoroutineRule.Companion.errorMessage
+import com.udacity.project4.locationreminders.MainCoroutineRule.Companion.notFoundMessage
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
+import com.udacity.project4.locationreminders.reminderslist.ReminderListFragmentDirections
+import kotlinx.coroutines.runBlocking
 
 //Use FakeDataSource that acts as a test double to the LocalDataSource
 class FakeDataSource(
-    private val remindersList: MutableList<ReminderDTO> = mutableListOf(
-        ReminderDTO(
-            "AtefHome",
-            "Sinai",
-            "El-Arish",
-            31.565,
-            30.565,
-            "1"
-        ),
-        ReminderDTO(
-            "AtefHome",
-            "Sinai",
-            "El-Arish",
-            31.565,
-            30.565,
-            "2"
-        ),
-        ReminderDTO(
-            "AtefHome",
-            "Sinai",
-            "El-Arish",
-            31.565,
-            30.565,
-            "3"
-        )
-    )
-) : ReminderDataSource {
+    private val remindersList: MutableList<ReminderDTO> = mutableListOf()) : ReminderDataSource {
 
-    private var  notFoundMessage= "not found!"
-    private var errorMessage = "Reminder Id not found"
+
 
     private var shouldReturnError = false
 
@@ -47,14 +24,17 @@ class FakeDataSource(
         if (shouldReturnError) {
             return Result.Error(errorMessage)
         }
-        remindersList?.let {
-            return Result.Success(ArrayList(it))
+        try {
+            remindersList.let {
+                return Result.Success(ArrayList(it))
+            }
+        }catch (ex:Exception){
+            return Result.Error(ex.localizedMessage)
         }
-        return Result.Error(notFoundMessage)
     }
 
     override suspend fun saveReminder(reminder: ReminderDTO) {
-        remindersList?.add(reminder)
+        remindersList.add(reminder)
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
@@ -62,16 +42,19 @@ class FakeDataSource(
             if (shouldReturnError) {
                 return Result.Error(errorMessage)
             }
-            remindersList?.let {
-                return Result.Success(it.single { reminder -> reminder.id == id })
+            if (remindersList!=null){
+                remindersList.let {
+                    return Result.Success(it.single { reminder -> reminder.id == id })
+                }
+            }else{
+                return Result.Error(notFoundMessage)
             }
-            return Result.Error(notFoundMessage)
         }catch (e: Exception){
             return Result.Error(e.localizedMessage)
         }
     }
 
     override suspend fun deleteAllReminders() {
-        remindersList?.clear()
+        remindersList.clear()
     }
 }
