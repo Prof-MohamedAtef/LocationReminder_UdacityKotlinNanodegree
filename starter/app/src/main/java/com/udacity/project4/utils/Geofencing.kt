@@ -26,7 +26,7 @@ fun geofencingPendingIntent(context: Context, reminderId: String): PendingIntent
     /*
     todo solution: added PendingIntent.FLAG_MUTABLE.
      */
-    return PendingIntent.getBroadcast(context, 0, intent,PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_ONE_SHOT)
+    return PendingIntent.getBroadcast(context, 0, intent,PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT)
 }
 
 @SuppressLint("MissingPermission")
