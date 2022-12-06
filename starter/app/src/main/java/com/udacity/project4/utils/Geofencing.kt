@@ -22,7 +22,11 @@ fun geofencingPendingIntent(context: Context, reminderId: String): PendingIntent
     val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
     intent.action = ACTION_GEOFENCING
     intent.putExtra(EXTRA_REMINDER, reminderId)
-    return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+    // TODO: App crashes when adding a Geofence (Nexus 7, API 32):
+    /*
+    todo solution: added PendingIntent.FLAG_MUTABLE.
+     */
+    return PendingIntent.getBroadcast(context, 0, intent,PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_ONE_SHOT)
 }
 
 @SuppressLint("MissingPermission")
