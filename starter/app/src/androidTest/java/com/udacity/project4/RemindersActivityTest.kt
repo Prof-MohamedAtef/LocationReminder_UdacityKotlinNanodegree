@@ -8,6 +8,7 @@ import android.view.View
 import androidx.navigation.NavController
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.NoMatchingViewException
@@ -188,14 +189,16 @@ class RemindersActivityTest :
         runBlocking { delay(1000) }
         // save poi
         onView(withId(R.id.savePoi)).perform(click())
-        runBlocking { delay(1000) }
+        runBlocking { delay(6000) }
         // Click on save reminder to save and add geofence
-        runBlocking { delay(4000) }
         onView(withId(R.id.saveReminder)).perform(click())
 
         runBlocking {
             repository.saveReminder(reminder)
         }
+        /*
+        todo: Espresso test for Toast message is incorrectly implemented.
+         */
         onView(withText(R.string.geofence_added)).inRoot(
             withDecorView(
                 not(

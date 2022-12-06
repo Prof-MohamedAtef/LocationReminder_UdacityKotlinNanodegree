@@ -207,9 +207,9 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     override fun onMapReady(map: GoogleMap) {
         mMap = map
 
-        mMap?.uiSettings?.isZoomControlsEnabled=true
-        mMap?.uiSettings?.isScrollGesturesEnabled=true
-        mMap?.uiSettings?.isRotateGesturesEnabled=true
+//        mMap?.uiSettings?.isZoomControlsEnabled=true
+//        mMap?.uiSettings?.isScrollGesturesEnabled=true
+//        mMap?.uiSettings?.isRotateGesturesEnabled=true
         mMap?.setMapStyle(context?.let {
             MapStyleOptions.loadRawResourceStyle(
                 it,
