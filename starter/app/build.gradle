@@ -138,4 +138,9 @@ dependencies {
 
     //circle Imageview
     implementation 'de.hdodenhof:circleimageview:3.1.0'
+
+    // addd to solve pendingIntent issue with Nexus 5 X devices:
+    // App crashes (force closes) when the user enters a Geofence (Nexus 5X, API 32):
+    //solution : https://stackoverflow.com/a/69152986
+    implementation 'androidx.work:work-runtime-ktx:2.7.0'
 }

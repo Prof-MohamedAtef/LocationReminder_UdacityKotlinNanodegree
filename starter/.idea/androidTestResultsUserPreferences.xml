@@ -51,9 +51,11 @@
               <option name="preferredColumnWidths">
                 <map>
                   <entry key="192.168.107.101:5555" value="120" />
+                  <entry key="192.168.107.102:5555" value="120" />
                   <entry key="Duration" value="90" />
                   <entry key="Genymobile" value="120" />
                   <entry key="Genymobile&#10; Galaxy S6" value="120" />
+                  <entry key="Genymobile&#10; Nexus 5" value="120" />
                   <entry key="Tests" value="360" />
                   <entry key="Xiaomi&#10; Redmi Note 7" value="120" />
                   <entry key="dcb98e6" value="120" />

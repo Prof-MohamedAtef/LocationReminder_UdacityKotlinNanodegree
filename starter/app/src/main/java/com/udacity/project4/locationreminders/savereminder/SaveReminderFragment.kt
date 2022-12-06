@@ -80,6 +80,7 @@ class SaveReminderFragment : BaseFragment() {
                     _viewModel.validateAndSaveReminder(reminder)
                 }
             } else {
+
                 requestBackgroundLocationPermission()
             }
         } else {

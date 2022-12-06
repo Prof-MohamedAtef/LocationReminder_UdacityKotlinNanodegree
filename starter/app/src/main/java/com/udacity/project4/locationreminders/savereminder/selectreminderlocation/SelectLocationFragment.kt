@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.savereminder.selectreminderlocation
 
 import android.annotation.SuppressLint
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -8,7 +9,8 @@ import android.util.Log
 import android.view.*
 import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -17,13 +19,14 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PointOfInterest
+import com.google.android.gms.tasks.Task
+import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.*
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
@@ -50,9 +53,19 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
 
-        if (!anyPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)) {
-            requestMissingPermissions(FOREGROUND_LOCATION_PERMISSIONS)
+        if (allPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)) {
+            if (allPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)) {
+                checkLocationSettingsEnabled()
+            } else {
+                requestForegroundLocationPermission()
+            }
+        } else {
+            requestMissingPermissions(BACKGROUND_LOCATION_PERMISSION)
         }
+
+//        if (!anyPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)) {
+//            requestMissingPermissions(FOREGROUND_LOCATION_PERMISSIONS)
+//        }
 
         val mapFragment = childFragmentManager
             .findFragmentById(R.id.map_fragment) as SupportMapFragment
@@ -72,6 +85,57 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 //        }
 
         return binding.root
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun requestForegroundLocationPermission() {
+        if (!anyPermissionsGranted(FOREGROUND_LOCATION_PERMISSIONS)) {
+            requestMissingPermissions(FOREGROUND_LOCATION_PERMISSIONS)
+        }
+    }
+
+    private fun checkLocationSettingsEnabled() {
+        val builder =
+            LocationSettingsRequest.Builder().addLocationRequest(
+                LocationRequest.create().apply {
+                    priority = LocationRequest.PRIORITY_LOW_POWER
+                }
+            )
+
+        val client: SettingsClient = LocationServices.getSettingsClient(requireActivity())
+        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    startIntentSenderForResult(
+                        exception.resolution.intentSender, Config.REQUEST_CHECK_SETTINGS,
+                        null, 0, 0, 0, null
+                    )
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    Snackbar.make(
+                        requireView(),
+                        R.string.location_required_error,
+                        Snackbar.LENGTH_LONG
+                    ).setAction(android.R.string.ok) {
+                        checkLocationSettingsEnabled()
+                    }.show()
+                }
+            }
+        }
+
+        task.addOnCompleteListener {
+            if (it.isSuccessful) {
+                Log.i("CheckDeviceLocation", "Granted")
+                Snackbar.make(
+                    requireView(),
+                    R.string.location_granted,
+                    Snackbar.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -143,6 +207,9 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     override fun onMapReady(map: GoogleMap) {
         mMap = map
 
+        mMap?.uiSettings?.isZoomControlsEnabled=true
+        mMap?.uiSettings?.isScrollGesturesEnabled=true
+        mMap?.uiSettings?.isRotateGesturesEnabled=true
         mMap?.setMapStyle(context?.let {
             MapStyleOptions.loadRawResourceStyle(
                 it,
