@@ -1,5 +1,6 @@
 package com.udacity.project4.atef
 
+import com.udacity.project4.R
 import android.app.Activity
 import android.app.Application
 import android.util.Log
@@ -12,6 +13,7 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -19,7 +21,6 @@ import androidx.test.rule.ActivityTestRule
 import androidx.test.rule.GrantPermissionRule
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PointOfInterest
-import com.udacity.project4.R
 import com.udacity.project4.authentication.AuthenticationViewModel
 import com.udacity.project4.authentication.FakeAuthController
 import com.udacity.project4.locationreminders.RemindersActivity
@@ -34,6 +35,8 @@ import com.udacity.project4.util.monitorActivity
 import kotlinx.android.synthetic.main.fragment_select_location.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.not
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -166,46 +169,64 @@ class RemindersActivityTest :
 
         // write title
         onView(withId(R.id.reminderTitle)).perform(typeText(reminder.title))
-        // check location granted snackBar on
-        onView(withText(R.string.location_granted))
-            .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+
         //write description
         onView(withId(R.id.reminderDescription)).perform(typeText(reminder.description), closeSoftKeyboard())
+
         // perform click
         onView(withId(R.id.selectLocation)).perform(click())
+        runBlocking { delay(1000) }
+        // check map is appearing
+        onView(withId(R.id.map_fragment)).check(matches(isDisplayed()))
 
-        try {
-            // check map is appearing
-            runBlocking { delay(3000) }
-            onView(withId(R.id.map_fragment)).check(matches(isDisplayed()))
+        //todo note
+        // May cannot perform a POI click which is hardoced
+        // You must click on the Map yourself during the delay ( during the map is appearing ).
 
-            //todo note
-            // May cannot perform a POI click which is hardoced
-            // You must click on the Map yourself during the delay ( during the map is appearing ).
+        // click on map
+        onView(withId(R.id.map_fragment)).perform(click())
+        runBlocking { delay(1000) }
+        // save poi
+        onView(withId(R.id.savePoi)).perform(click())
+        runBlocking { delay(1000) }
+        // Click on save reminder to save and add geofence
+        runBlocking { delay(4000) }
+        onView(withId(R.id.saveReminder)).perform(click())
 
-            // redirect to select location screen
-            runBlocking { delay(1000) }
-            // save poi
-            onView(withId(R.id.savePoi)).perform(click())
-
-            // Click on save reminder to save and add geofence
-            runBlocking { delay(4000) }
-            onView(withId(R.id.saveReminder)).perform(click())
-
-            runBlocking {
-                repository.saveReminder(reminder)
-            }
-
-            onView(withText(R.string.geofence_added))
-                .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
-
-            Log.e("AtefTest", "Finished Testing")
-
-            // close activity
-            remindersActivity.close()
-        } catch (e: NoMatchingViewException) {
-            // View is not in hierarchy
-            Log.e("Some Tests Failed", "Please Select a Point on map")
+        runBlocking {
+            repository.saveReminder(reminder)
         }
+        onView(withText(R.string.geofence_added)).inRoot(
+            withDecorView(
+                not(
+                    `is`(
+                        decorView
+                    )
+                )
+            )
+        ).check(matches(isDisplayed()))
+
+//            onView(withText(R.string.geofence_added))
+//                .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+
+        // Verify reminder is displayed on screen in the task list.
+        onView(withText(reminder.title)).check(matches(isDisplayed()))
+        onView(withText(reminder.description)).check(matches(isDisplayed()))
+
+        Log.e("AtefTest", "Finished Testing")
+
+        // close activity
+        remindersActivity.close()
+
+//        try {
+//
+//        } catch (e: NoMatchingViewException) {
+//            // View is not in hierarchy
+//            Log.e("Some Tests Failed", "Please Select a Point on map")
+//        }
     }
 }
+
+//        // check location granted snackBar on
+//        onView(withText(R.string.location_granted))
+//            .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
