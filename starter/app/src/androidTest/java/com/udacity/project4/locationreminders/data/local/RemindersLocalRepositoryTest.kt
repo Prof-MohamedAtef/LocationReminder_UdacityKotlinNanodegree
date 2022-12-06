@@ -8,6 +8,7 @@ import androidx.test.filters.MediumTest
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 import com.udacity.project4.util.assertReminder
+import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -150,16 +151,17 @@ class RemindersLocalRepositoryTest {
         assertThat(reminders, IsEqual(localReminder))
     }
 
+
     @Test
     fun assertErrorReturned() = runBlocking {
         // GIVEN - a non inserted reminder id
         val invalidId = "!!!INVALID!!!"
 
-        // WHEN - tries to get it
-        val got = remindersRepository.getReminder(invalidId)
+        val errorMessage=remindersRepository.getReminder(invalidId) as Result.Error
 
-        // THEN - return a fail
-        assert(got is Result.Error)
+        val error=Result.Error(message = "Reminder not found!")
+
+        assertThat(errorMessage.message,`is`(error.message))
     }
 
 
