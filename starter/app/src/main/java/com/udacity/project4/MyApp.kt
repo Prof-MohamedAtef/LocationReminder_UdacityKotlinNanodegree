@@ -32,8 +32,8 @@ class MyApp : Application() {
         /*
         global sharedPrefs
          */
-        instance=this
-        prefs=MyPrefs(applicationContext)
+        instance = this
+        prefs = MyPrefs(applicationContext)
 
         /**
          * use Koin Library as a service locator
@@ -47,14 +47,17 @@ class MyApp : Application() {
                 )
 
             }
-            //Declare singleton definitions to be later injected using by inject()
-            single {
-                //This view model is declared singleton to be used across multiple fragments
+            viewModel {
                 SaveReminderViewModel(
                     get(),
                     get() as ReminderDataSource
                 )
             }
+//            //Declare singleton definitions to be later injected using by inject()
+//            single {
+//                //This view model is declared singleton to be used across multiple fragments
+//
+//            }
 
             //Declare singleton definitions to be later injected using by inject()
             single {
