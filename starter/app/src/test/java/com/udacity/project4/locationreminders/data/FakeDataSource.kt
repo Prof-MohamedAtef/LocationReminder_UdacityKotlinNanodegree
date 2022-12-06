@@ -5,11 +5,37 @@ import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 
 //Use FakeDataSource that acts as a test double to the LocalDataSource
-class FakeDataSource(var remindersList: MutableList<ReminderDTO>? = mutableListOf()) :
-    ReminderDataSource {
+class FakeDataSource(
+    private val remindersList: MutableList<ReminderDTO> = mutableListOf(
+        ReminderDTO(
+            "AtefHome",
+            "Sinai",
+            "El-Arish",
+            31.565,
+            30.565,
+            "1"
+        ),
+        ReminderDTO(
+            "AtefHome",
+            "Sinai",
+            "El-Arish",
+            31.565,
+            30.565,
+            "2"
+        ),
+        ReminderDTO(
+            "AtefHome",
+            "Sinai",
+            "El-Arish",
+            31.565,
+            30.565,
+            "3"
+        )
+    )
+) : ReminderDataSource {
 
-    var remindersServiceData: LinkedHashMap<String, ReminderDTO> = LinkedHashMap()
-    private val observableReminders = MutableLiveData<Result<List<ReminderDTO>>>()
+    private var  notFoundMessage= "not found!"
+    private var errorMessage = "Reminder Id not found"
 
     private var shouldReturnError = false
 
@@ -19,12 +45,12 @@ class FakeDataSource(var remindersList: MutableList<ReminderDTO>? = mutableListO
 
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
         if (shouldReturnError) {
-            return Result.Error("testing error!")
+            return Result.Error(errorMessage)
         }
         remindersList?.let {
             return Result.Success(ArrayList(it))
         }
-        return Result.Error("not found!")
+        return Result.Error(notFoundMessage)
     }
 
     override suspend fun saveReminder(reminder: ReminderDTO) {
@@ -32,22 +58,20 @@ class FakeDataSource(var remindersList: MutableList<ReminderDTO>? = mutableListO
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
-        if (shouldReturnError) {
-            return Result.Error("testing error!")
+        try {
+            if (shouldReturnError) {
+                return Result.Error(errorMessage)
+            }
+            remindersList?.let {
+                return Result.Success(it.single { reminder -> reminder.id == id })
+            }
+            return Result.Error(notFoundMessage)
+        }catch (e: Exception){
+            return Result.Error(e.localizedMessage)
         }
-        remindersList?.let {
-            return Result.Success(it.single { reminder -> reminder.id == id })
-        }
-        return Result.Error("not found!")
     }
 
     override suspend fun deleteAllReminders() {
         remindersList?.clear()
-    }
-
-    fun addReminder(vararg reminders: ReminderDTO) {
-        for (reminder in reminders) {
-            remindersServiceData[reminder.id] = reminder
-        }
     }
 }

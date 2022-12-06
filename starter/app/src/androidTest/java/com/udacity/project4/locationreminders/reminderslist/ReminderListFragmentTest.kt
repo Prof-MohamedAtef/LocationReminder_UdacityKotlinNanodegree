@@ -78,7 +78,6 @@ class ReminderListFragmentTest {
             }
             single { RemindersLocalRepository(get()) as ReminderDataSource }
             single { LocalDB.createRemindersDao(context) }
-
         }
 
         //declare a new koin module
@@ -110,6 +109,7 @@ class ReminderListFragmentTest {
     //    TODO: add testing for the error messages.
     @Test
     fun testErrorReturned(){
+
         val fragmentScenario = launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
         dataBindingIdlingResource.monitorFragment(fragmentScenario)
         onView(withText(R.string.no_data))

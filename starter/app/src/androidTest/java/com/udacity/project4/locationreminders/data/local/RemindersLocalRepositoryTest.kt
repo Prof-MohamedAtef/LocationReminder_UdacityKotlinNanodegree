@@ -76,7 +76,6 @@ class RemindersLocalRepositoryTest {
 
     )
 
-
     private val reminder1 = ReminderDTO(
         "Reminder title 1",
         "Reminder description 1",
@@ -151,7 +150,6 @@ class RemindersLocalRepositoryTest {
         assertThat(reminders, IsEqual(localReminder))
     }
 
-
     @Test
     fun assertErrorReturned() = runBlocking {
         // GIVEN - a non inserted reminder id
@@ -163,7 +161,6 @@ class RemindersLocalRepositoryTest {
 
         assertThat(errorMessage.message,`is`(error.message))
     }
-
 
     @Test
     fun insertManyAndGetAsMany() = runBlocking {
@@ -183,8 +180,6 @@ class RemindersLocalRepositoryTest {
             assertReminder(reference, reminder)
         }
     }
-
-
 
     @After
     fun cleanUp() = remindersDatabase.close()

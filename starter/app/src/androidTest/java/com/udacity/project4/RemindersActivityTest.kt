@@ -189,7 +189,7 @@ class RemindersActivityTest :
         runBlocking { delay(1000) }
         // save poi
         onView(withId(R.id.savePoi)).perform(click())
-        runBlocking { delay(6000) }
+        runBlocking { delay(4000) }
         // Click on save reminder to save and add geofence
         onView(withId(R.id.saveReminder)).perform(click())
 
